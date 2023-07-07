@@ -128,7 +128,7 @@ class PerhitunganController extends Controller
                 }
             } else if ($kriteriaUser) {
 
-                $perhitungan = Perhitungan::where('plan_id', $allPlan[$a]->id)->where('user_id', auth()->user()->id)->where('kriteria_id', $kriteriaUser->kriteria_id)->first();
+                $perhitungan = Perhitungan::where('plan_id', $allPlan[$a]->id)->where('user_id', auth()->user()->id)->where('kriteria_id', $forK->id)->first();
 
                 if ($perhitungan) {
 
@@ -145,7 +145,7 @@ class PerhitunganController extends Controller
                     }
                 } else {
 
-                    
+
 
                     if ($namaCol == 'rekomendasi_perangkat') {
                         Perhitungan::create([
@@ -167,28 +167,45 @@ class PerhitunganController extends Controller
                 }
             } else {
 
-                if ($namaCol == 'rekomendasi_perangkat') {
-                    Perhitungan::create([
-                        'plan_id' => $allPlan[$a]->id,
-                        'kriteria_id' => $forK->id,
-                        'nilai_matriks_ternormalisasi' => (float)$allPlan[$a]->poin_optional / sqrt($plan->amount),
-                        'nilai_ternormalisasi_terbobot' => ((float)$allPlan[$a]->poin_optional / sqrt($plan->amount)) * $forK->bobot,
-                        'user_id' => auth()->user()->id
-                    ]);
+                $perhitungan = Perhitungan::where('plan_id', $allPlan[$a]->id)->where('user_id', auth()->user()->id)->where('kriteria_id', $forK->id)->first();
+
+                if ($perhitungan) {
+
+                    if ($namaCol == 'rekomendasi_perangkat') {
+                        $perhitungan->nilai_matriks_ternormalisasi = (float)$allPlan[$a]->poin_optional / sqrt($plan->amount);
+                        $perhitungan->nilai_ternormalisasi_terbobot = ((float)$allPlan[$a]->poin_optional / sqrt($plan->amount)) * $forK->bobot;
+                        $perhitungan->user_id = auth()->user()->id;
+                        $perhitungan->save();
+                    } else {
+                        $perhitungan->nilai_matriks_ternormalisasi = (float)$allPlan[$a]->poin / sqrt($plan->amount);
+                        $perhitungan->nilai_ternormalisasi_terbobot = ((float)$allPlan[$a]->poin / sqrt($plan->amount)) * $forK->bobot;
+                        $perhitungan->user_id = auth()->user()->id;
+                        $perhitungan->save();
+                    }
                 } else {
-                    Perhitungan::create([
-                        'plan_id' => $allPlan[$a]->id,
-                        'kriteria_id' => $forK->id,
-                        'nilai_matriks_ternormalisasi' => (float)$allPlan[$a]->poin / sqrt($plan->amount),
-                        'nilai_ternormalisasi_terbobot' => ((float)$allPlan[$a]->poin / sqrt($plan->amount)) * $forK->bobot,
-                        'user_id' => auth()->user()->id
-                    ]);
+
+
+
+                    if ($namaCol == 'rekomendasi_perangkat') {
+                        Perhitungan::create([
+                            'plan_id' => $allPlan[$a]->id,
+                            'kriteria_id' => $forK->id,
+                            'nilai_matriks_ternormalisasi' => (float)$allPlan[$a]->poin_optional / sqrt($plan->amount),
+                            'nilai_ternormalisasi_terbobot' => ((float)$allPlan[$a]->poin_optional / sqrt($plan->amount)) * $forK->bobot,
+                            'user_id' => auth()->user()->id
+                        ]);
+                    } else {
+                        Perhitungan::create([
+                            'plan_id' => $allPlan[$a]->id,
+                            'kriteria_id' => $forK->id,
+                            'nilai_matriks_ternormalisasi' => (float)$allPlan[$a]->poin / sqrt($plan->amount),
+                            'nilai_ternormalisasi_terbobot' => ((float)$allPlan[$a]->poin / sqrt($plan->amount)) * $forK->bobot,
+                            'user_id' => auth()->user()->id
+                        ]);
+                    }
                 }
             }
-
-           
         }
-
     }
 
     public function nilaiMaxMin($forK)

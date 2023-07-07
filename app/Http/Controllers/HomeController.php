@@ -36,28 +36,58 @@ class HomeController extends Controller
 
         // Top 5 Paket data dan kategori
 
-        $topOne = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
-            ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
-            ->where('perangkingan', 1)
-            ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
-            ->first();
+        $checkHitung = Perankingan::where('user_id', auth()->user()->id)->first();
 
-        $getMid = round($plan / 2);
+        if (auth()->user()->role == 'superadmin' || !$checkHitung) {
 
-        $middle = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
-            ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
-            ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
-            ->where('perankingans.perangkingan', $getMid)
-            ->first();
+            $topOne = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
+                ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
+                ->where('perangkingan', 1)
+                ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
+                ->first();
+
+            $getMid = round($plan / 2);
+
+            $middle = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
+                ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
+                ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
+                ->where('perankingans.perangkingan', $getMid)
+                ->first();
+
+            $topFive = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
+                ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
+                ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
+                ->orderBy('perangkingan', 'ASC')
+                ->whereNull('user_id')
+                ->take(5)
+                ->get();
+        } else if ($checkHitung) {
+            $topOne = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
+                ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
+                ->where('perangkingan', 1)
+                ->where('user_id', auth()->user()->id)
+                ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
+                ->first();
+
+            $getMid = round($plan / 2);
+
+            $middle = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
+                ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
+                ->where('user_id', auth()->user()->id)
+                ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
+                ->where('perankingans.perangkingan', $getMid)
+                ->first();
+
+            $topFive = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
+                ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
+                ->where('user_id', auth()->user()->id)
+                ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
+                ->orderBy('perangkingan', 'ASC')
+                ->take(5)
+                ->get();
+        }
 
         $kriteria = Kriteria::get();
-
-        $topFive = $topOne = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
-            ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
-            ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
-            ->orderBy('perangkingan', 'ASC')
-            ->take(5)
-            ->get();
 
         // Paket Data Home
 

@@ -54,8 +54,8 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Top Alternatif</p>
                                 <h5 style="font-size:16px;" class="font-weight-bolder">
-                                    @if (count($topOne) > 0)
-                                    {{$topOne[0]->name}}
+                                    @if ($topOne)
+                                    {{$topOne->name}}
                                     @endif
                                 </h5>
                             </div>

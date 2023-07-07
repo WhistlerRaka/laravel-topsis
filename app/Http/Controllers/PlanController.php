@@ -200,7 +200,10 @@ class PlanController extends Controller
 
     public function nilaiTernormalisasi()
     {
-        if (auth()->user()->role == 'superadmin') {
+
+        $checkHitung = Perhitungan::where('user_id', auth()->user()->id)->first();
+
+        if (auth()->user()->role == 'superadmin' || !$checkHitung) {
 
             $plan = Plan::join('paket_data as pd', 'pd.id', 'plans.paket_id')
                 ->select('plans.id', 'pd.name')
@@ -211,7 +214,7 @@ class PlanController extends Controller
                 ->whereNull('perhitungans.user_id')
                 ->select('perhitungans.plan_id', 'kriterias.nama', 'nilai_matriks_ternormalisasi')
                 ->get();
-        } else {
+        } else if ($checkHitung) {
 
             $plan = Plan::join('paket_data as pd', 'pd.id', 'plans.paket_id')
                 ->select('plans.id', 'pd.name')
@@ -230,7 +233,9 @@ class PlanController extends Controller
 
     public function nilaiTernormalisasiBobot()
     {
-        if (auth()->user()->role == 'superadmin') {
+        $checkHitung = Perhitungan::where('user_id', auth()->user()->id)->first();
+
+        if (auth()->user()->role == 'superadmin' || !$checkHitung) {
 
             $plan = Plan::join('paket_data as pd', 'pd.id', 'plans.paket_id')
                 ->select('plans.id', 'pd.name')
@@ -241,7 +246,7 @@ class PlanController extends Controller
                 ->whereNull('perhitungans.user_id')
                 ->select('perhitungans.plan_id', 'kriterias.nama', 'nilai_ternormalisasi_terbobot')
                 ->get();
-        } else {
+        } else if ($checkHitung) {
 
             $plan = Plan::join('paket_data as pd', 'pd.id', 'plans.paket_id')
                 ->select('plans.id', 'pd.name')
@@ -260,7 +265,9 @@ class PlanController extends Controller
 
     public function perankingan()
     {
-        if (auth()->user()->role == 'superadmin') {
+        $checkRank = Perankingan::where('user_id', auth()->user()->id)->first();
+
+        if (auth()->user()->role == 'superadmin' || !$checkRank) {
 
             $data = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
                 ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
@@ -268,7 +275,7 @@ class PlanController extends Controller
                 ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
                 ->orderBy('perangkingan', 'ASC')
                 ->get();
-        } else {
+        } else if ($checkRank) {
 
             $data = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
                 ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
