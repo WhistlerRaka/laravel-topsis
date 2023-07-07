@@ -1,0 +1,102 @@
+@extends('layouts.app', ['class' => 'g-sidenav-show bg-gray-100'])
+
+@section('content')
+@include('layouts.navbars.auth.topnav', ['title' => 'Edit Plan'])
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <form role="form" method="POST" action="{{ route('plan.update', $data->id) }}">
+                    @csrf
+                    <div class="card-header pb-0">
+                        <div class="d-flex align-items-center">
+                            <p class="mb-0">Edit Plan</p>
+                            <button type="submit" class="btn btn-primary btn-sm ms-auto">Save</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="example-text-input" class="form-control-label">Paket Data</label>
+                                    <select class="form-select" name="paket_id" aria-label="Default select example">
+                                        <option selected>Pilih paket data</option>
+                                        @foreach ($dataPaket as $dp)
+                                        <option <?= ($data->paket_id == $dp->id) ? 'selected' : '' ?> value='{{$dp->id}}'>{{$dp->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="example-text-input" class="form-control-label">Kecepatan</label>
+                                    <select id="kecepatan" class="form-select" name="kecepatan" aria-label="Default select example">
+                                        <option selected>Pilih Kecepatan</option>
+                                        @foreach ($kecepatan as $k)
+                                        <option @if ($data->kecepatan == $k->id)
+                                            selected
+                                            @endif data-optional="{{$k->data_optional}}" data-poin="{{$k->id}}" value="{{$k->id}}">{{$k->poin}} - {{$k->keterangan}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="example-text-input" class="form-control-label">Rekomendasi Perangkat</label>
+                                    <input id="rekom_perangkat" readonly class="form-control" type="text" name="" value="">
+                                    <input id="poin_rekom_perangkat" hidden readonly class="form-control" type="text" name="rekomendasi_perangkat" value="">
+                                </div>
+                            </div>
+                        </div>
+                        @foreach ($kriteria as $k)
+                        @if ($k->nama != 'Kecepatan' && $k->nama != 'Rekomendasi Perangkat')
+                        @php($namaCol = str_replace(array(' ', '/'), '_', strtolower($k->nama)))
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="example-text-input" class="form-control-label">{{$k->nama}}</label>
+                                    <select id="{{str_replace(array(' ', '/'), '_', strtolower($k->nama))}}" class="form-select" name="{{str_replace(array(' ', '/'), '_', strtolower($k->nama))}}" aria-label="Default select example">
+                                        <option selected>Pilih {{$k->nama}}</option>
+                                        @foreach ($detailKriteria as $dk)
+                                        @if ($dk->kriteria_id == $k->id)
+                                        <option @if ($data->$namaCol == $dk->id) selected @endif data-optional="{{$dk->data_optional}}" value="{{$dk->id}}">{{$dk->poin}} - {{$dk->keterangan}}</option>
+                                        @endif
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                        @endforeach
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @include('layouts.footers.auth.footer')
+</div>
+@endsection
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+    $(document).on('change', '#kecepatan', function(e) {
+        e.preventDefault();
+        var poin = $('#kecepatan').val();
+        var rekomen = $('#kecepatan').find(':selected').data("optional");
+        var poin_rekomen = $('#kecepatan').find(':selected').data("poin");
+        $('#rekom_perangkat').val(rekomen)
+        $('#poin_rekom_perangkat').val(poin_rekomen)
+    });
+
+    $(document).ready(function() {
+        var poin = $('#kecepatan').val();
+        var rekomen = $('#kecepatan').find(':selected').data("optional");
+        var poin_rekomen = $('#kecepatan').find(':selected').data("poin");
+        $('#rekom_perangkat').val(rekomen)
+        $('#poin_rekom_perangkat').val(poin_rekomen)
+    });
+</script>
