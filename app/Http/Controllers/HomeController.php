@@ -43,6 +43,7 @@ class HomeController extends Controller
             $topOne = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')
                 ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
                 ->where('perangkingan', 1)
+                ->whereNull('user_id')
                 ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
                 ->first();
 
@@ -52,6 +53,7 @@ class HomeController extends Controller
                 ->join('paket_data as pd', 'pd.id', 'plans.paket_id')
                 ->select('pd.name', 'nilai_solusi_negatif', 'nilai_solusi_positif', 'preferensi', 'perangkingan')
                 ->where('perankingans.perangkingan', $getMid)
+                ->whereNull('user_id')
                 ->first();
 
             $topFive = Perankingan::join('plans', 'plans.id', 'perankingans.plan_id')

@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <!-- Paket Data Home --> -->
+    <!-- Paket Data Home -->
 
     <!-- <div class="row mt-4">
         <div class="col-xl-12 col-lg-5 col-md-7 mx-auto">
