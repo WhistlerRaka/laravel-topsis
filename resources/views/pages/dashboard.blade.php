@@ -77,9 +77,9 @@
                             <div class="numbers">
                                 <p class="text-sm mb-0 text-uppercase font-weight-bold">Sering digunakan</p>
                                 <h5 style="font-size:16px;" class="font-weight-bolder">
-                                    @if ($middle)
+                                    <!-- @if ($middle)
                                     {{$middle->name}}
-                                    @endif
+                                    @endif -->
                                 </h5>
                             </div>
                         </div>
