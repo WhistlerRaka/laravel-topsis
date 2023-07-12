@@ -15,32 +15,32 @@ class PerhitunganController extends Controller
 {
     //
 
-    public function nilaiPembagi($kriteria)
-    {
-        $columns = Schema::getColumnListing('plans');
+    // public function nilaiPembagi($kriteria)
+    // {
+    //     $columns = Schema::getColumnListing('plans');
 
-        foreach ($kriteria as $i => $val) {
-            foreach ($columns as $c => $val) {
+    //     foreach ($kriteria as $i => $val) {
+    //         foreach ($columns as $c => $val) {
 
-                if (
-                    str_replace(array(' ', '/'), '_', strtolower($kriteria[$i]->nama)) == $columns[$c]
-                    && $columns[$c] != 'created_at' && $columns[$c] != 'updated_at' && $columns[$c] != 'id'
-                ) {
+    //             if (
+    //                 str_replace(array(' ', '/'), '_', strtolower($kriteria[$i]->nama)) == $columns[$c]
+    //                 && $columns[$c] != 'created_at' && $columns[$c] != 'updated_at' && $columns[$c] != 'id'
+    //             ) {
 
-                    //Mencari nilai pembagi
+    //                 //Mencari nilai pembagi
 
-                    if ($columns[$c] == 'rekomendasi_perangkat') {
-                        $plan = Plan::join('detail_kriterias as dk', 'dk.id', $columns[$c])
-                            ->select(DB::raw("(sum(pow(dk.poin_optional,2))) AS amount"))
-                            ->first();
-                    } else {
-                        $plan = Plan::join('detail_kriterias as dk', 'dk.id', $columns[$c])
-                            // ->select($columns[$c], 'dk.poin')
-                            ->select(DB::raw("(sum(pow(dk.poin,2))) AS amount"))
-                            ->first();
-                    }
-                }
-            }
+    //                 if ($columns[$c] == 'rekomendasi_perangkat') {
+    //                     $plan = Plan::join('detail_kriterias as dk', 'dk.id', $columns[$c])
+    //                         ->select(DB::raw("(sum(pow(dk.poin_optional,2))) AS amount"))
+    //                         ->first();
+    //                 } else {
+    //                     $plan = Plan::join('detail_kriterias as dk', 'dk.id', $columns[$c])
+    //                         // ->select($columns[$c], 'dk.poin')
+    //                         ->select(DB::raw("(sum(pow(dk.poin,2))) AS amount"))
+    //                         ->first();
+    //                 }
+    //             }
+    //         }
 
             if (auth()->user()->role == 'superadmin') {
                 $pembagi = Pembagi::where('kriteria_id', $kriteria[$i]->id)->first();
