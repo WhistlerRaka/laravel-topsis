@@ -145,8 +145,6 @@ class PerhitunganController extends Controller
                     }
                 } else {
 
-
-
                     if ($namaCol == 'rekomendasi_perangkat') {
                         Perhitungan::create([
                             'plan_id' => $allPlan[$a]->id,
@@ -165,45 +163,6 @@ class PerhitunganController extends Controller
                         ]);
                     }
                 }
-            } else {
-
-                $perhitungan = Perhitungan::where('plan_id', $allPlan[$a]->id)->where('user_id', auth()->user()->id)->where('kriteria_id', $forK->id)->first();
-
-                if ($perhitungan) {
-
-                    if ($namaCol == 'rekomendasi_perangkat') {
-                        $perhitungan->nilai_matriks_ternormalisasi = (float)$allPlan[$a]->poin_optional / sqrt($plan->amount);
-                        $perhitungan->nilai_ternormalisasi_terbobot = ((float)$allPlan[$a]->poin_optional / sqrt($plan->amount)) * $forK->bobot;
-                        $perhitungan->user_id = auth()->user()->id;
-                        $perhitungan->save();
-                    } else {
-                        $perhitungan->nilai_matriks_ternormalisasi = (float)$allPlan[$a]->poin / sqrt($plan->amount);
-                        $perhitungan->nilai_ternormalisasi_terbobot = ((float)$allPlan[$a]->poin / sqrt($plan->amount)) * $forK->bobot;
-                        $perhitungan->user_id = auth()->user()->id;
-                        $perhitungan->save();
-                    }
-                } else {
-
-
-
-                    if ($namaCol == 'rekomendasi_perangkat') {
-                        Perhitungan::create([
-                            'plan_id' => $allPlan[$a]->id,
-                            'kriteria_id' => $forK->id,
-                            'nilai_matriks_ternormalisasi' => (float)$allPlan[$a]->poin_optional / sqrt($plan->amount),
-                            'nilai_ternormalisasi_terbobot' => ((float)$allPlan[$a]->poin_optional / sqrt($plan->amount)) * $forK->bobot,
-                            'user_id' => auth()->user()->id
-                        ]);
-                    } else {
-                        Perhitungan::create([
-                            'plan_id' => $allPlan[$a]->id,
-                            'kriteria_id' => $forK->id,
-                            'nilai_matriks_ternormalisasi' => (float)$allPlan[$a]->poin / sqrt($plan->amount),
-                            'nilai_ternormalisasi_terbobot' => ((float)$allPlan[$a]->poin / sqrt($plan->amount)) * $forK->bobot,
-                            'user_id' => auth()->user()->id
-                        ]);
-                    }
-                }
             }
         }
     }
@@ -217,26 +176,56 @@ class PerhitunganController extends Controller
         if (auth()->user()->role == 'superadmin') {
 
             if ($addMaxMin) {
-                $addMaxMin->nilai_min = (float)Perhitungan::where('kriteria_id', $forK->id)->whereNull('perhitungans.user_id')->min('nilai_ternormalisasi_terbobot');
-                $addMaxMin->nilai_max = (float)Perhitungan::where('kriteria_id', $forK->id)->whereNull('perhitungans.user_id')->max('nilai_ternormalisasi_terbobot');
-                $addMaxMin->save();
+                if ($forK->sifat == 'Benefit') {
+
+                    $addMaxMin->nilai_min = (float)Perhitungan::where('kriteria_id', $forK->id)->whereNull('perhitungans.user_id')->min('nilai_ternormalisasi_terbobot');
+                    $addMaxMin->nilai_max = (float)Perhitungan::where('kriteria_id', $forK->id)->whereNull('perhitungans.user_id')->max('nilai_ternormalisasi_terbobot');
+                    $addMaxMin->save();
+                } else {
+
+                    $addMaxMin->nilai_min = (float)Perhitungan::where('kriteria_id', $forK->id)->whereNull('perhitungans.user_id')->max('nilai_ternormalisasi_terbobot');
+                    $addMaxMin->nilai_max = (float)Perhitungan::where('kriteria_id', $forK->id)->whereNull('perhitungans.user_id')->min('nilai_ternormalisasi_terbobot');
+                    $addMaxMin->save();
+                }
             }
         } else {
 
             $addMaxMinUser = Pembagi::where('kriteria_id', $forK->id)->where('user_id', auth()->user()->id)->first();
 
             if ($addMaxMinUser) {
-                $addMaxMinUser->nilai_min = (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot');
-                $addMaxMinUser->nilai_max = (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot');
-                $addMaxMinUser->save();
+
+                if ($forK->sifat == 'Benefit') {
+
+                    $addMaxMinUser->nilai_min = (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot');
+                    $addMaxMinUser->nilai_max = (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot');
+                    $addMaxMinUser->save();
+                } else {
+
+                    $addMaxMinUser->nilai_min = (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot');
+                    $addMaxMinUser->nilai_max = (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot');
+                    $addMaxMinUser->save();
+                }
             } else {
-                Pembagi::create([
-                    'kriteria_id' => $forK->id,
-                    'nilai' => $addMaxMin->pembagi,
-                    'nilai_min' => (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot'),
-                    'nilai_max' => (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot'),
-                    'user_id' => auth()->user()->id,
-                ]);
+
+                if ($forK->sifat == 'Benefit') {
+
+                    Pembagi::create([
+                        'kriteria_id' => $forK->id,
+                        'nilai' => $addMaxMin->pembagi,
+                        'nilai_min' => (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot'),
+                        'nilai_max' => (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot'),
+                        'user_id' => auth()->user()->id,
+                    ]);
+                } else {
+
+                    Pembagi::create([
+                        'kriteria_id' => $forK->id,
+                        'nilai' => $addMaxMin->pembagi,
+                        'nilai_min' => (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot'),
+                        'nilai_max' => (float)Perhitungan::where('kriteria_id', $forK->id)->where('perhitungans.user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot'),
+                        'user_id' => auth()->user()->id,
+                    ]);
+                }
             }
         }
     }
@@ -251,8 +240,16 @@ class PerhitunganController extends Controller
             foreach ($kriteria as $i => $val) {
 
                 if (auth()->user()->role == 'superadmin') {
-                    $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->min('nilai_ternormalisasi_terbobot');
-                    $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->max('nilai_ternormalisasi_terbobot');
+
+                    if ($kriteria[$i]->sifat == 'Benefit') {
+
+                        $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->min('nilai_ternormalisasi_terbobot');
+                        $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->max('nilai_ternormalisasi_terbobot');
+                    } else {
+
+                        $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->max('nilai_ternormalisasi_terbobot');
+                        $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->min('nilai_ternormalisasi_terbobot');
+                    }
 
                     $pos = Perhitungan::where('plan_id', $allPlan[$a]->id)->whereNull('user_id')->where('kriteria_id', $kriteria[$i]->id)->select(DB::raw("(pow(($nilaiMax - nilai_ternormalisasi_terbobot),2)) AS nilaiPos"))->first();
                     $neg = Perhitungan::where('plan_id', $allPlan[$a]->id)->whereNull('user_id')->where('kriteria_id', $kriteria[$i]->id)->select(DB::raw("(pow((nilai_ternormalisasi_terbobot - $nilaiMin),2)) AS nilaiNeg"))->first();
@@ -263,8 +260,17 @@ class PerhitunganController extends Controller
                     $perhitungan = Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->first();
 
                     if ($perhitungan) {
-                        $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot');
-                        $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot');
+
+                        if ($kriteria[$i]->sifat == 'Benefit') {
+
+                            $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot');
+                            $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot');
+                        } else {
+
+                            $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->max('nilai_ternormalisasi_terbobot');
+                            $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->where('user_id', auth()->user()->id)->min('nilai_ternormalisasi_terbobot');
+                        }
+
 
                         $pos = Perhitungan::where('plan_id', $allPlan[$a]->id)->where('user_id', auth()->user()->id)->where('kriteria_id', $kriteria[$i]->id)->select(DB::raw("(pow(($nilaiMax - nilai_ternormalisasi_terbobot),2)) AS nilaiPos"))->first();
                         $neg = Perhitungan::where('plan_id', $allPlan[$a]->id)->where('user_id', auth()->user()->id)->where('kriteria_id', $kriteria[$i]->id)->select(DB::raw("(pow((nilai_ternormalisasi_terbobot - $nilaiMin),2)) AS nilaiNeg"))->first();
@@ -273,8 +279,15 @@ class PerhitunganController extends Controller
                         $nilaiNegatif += (float)$neg->nilaiNeg;
                     } else {
 
-                        $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->min('nilai_ternormalisasi_terbobot');
-                        $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->max('nilai_ternormalisasi_terbobot');
+                        if ($kriteria[$i]->sifat == 'Benefit') {
+
+                            $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->min('nilai_ternormalisasi_terbobot');
+                            $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->max('nilai_ternormalisasi_terbobot');
+                        } else {
+
+                            $nilaiMin = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->max('nilai_ternormalisasi_terbobot');
+                            $nilaiMax = (float)Perhitungan::where('kriteria_id', $kriteria[$i]->id)->whereNull('user_id')->min('nilai_ternormalisasi_terbobot');
+                        }
 
                         $pos = Perhitungan::where('plan_id', $allPlan[$a]->id)->whereNull('user_id')->where('kriteria_id', $kriteria[$i]->id)->select(DB::raw("(pow(($nilaiMax - nilai_ternormalisasi_terbobot),2)) AS nilaiPos"))->first();
                         $neg = Perhitungan::where('plan_id', $allPlan[$a]->id)->whereNull('user_id')->where('kriteria_id', $kriteria[$i]->id)->select(DB::raw("(pow((nilai_ternormalisasi_terbobot - $nilaiMin),2)) AS nilaiNeg"))->first();
